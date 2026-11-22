@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RallyUp — IIT Kharagpur Campus Coordination Engine</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            },
+            rally: {
+              orange: '#FF5A36',
+              dark: '#0F172A',
+              card: '#1E293B',
+              accent: '#38BDF8',
+              purple: '#818CF8'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Outfit"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-orange-500 selection:text-white">
+
+  <!-- Desktop Wrapper with App Preview Frames -->
+  <div class="min-h-screen flex flex-col justify-between">
+    
+    <!-- Top Header Bar for Desktop Viewers -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-4 lg:px-8 py-3">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+            <i data-lucide="zap" class="w-6 h-6 text-white fill-white"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xl font-display font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-orange-400 bg-clip-text text-transparent">RallyUp</span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">IIT Kharagpur</span>
+            </div>
+            <p class="text-xs text-slate-400 hidden sm:block">From "Bhai cricket khelenge?" to "Let's Go" in 60s across 2,200 acres</p>
+          </div>
+        </div>
+
+        <!-- Campus Switcher & User Status -->
+        <div class="flex items-center space-x-3">
+          <div class="hidden md:flex items-center space-x-2 bg-slate-800/80 border border-slate-700/60 rounded-full px-3 py-1.5 text-xs text-slate-300">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span class="font-medium" id="campus-name-badge">IIT Kharagpur (Azad Hall Sector)</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-emerald-400 font-medium">58 KGPians Active</span>
+          </div>
+
+          <button id="view-mode-toggle" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 flex items-center space-x-1.5 transition">
+            <i data-lucide="smartphone" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span class="hidden sm:inline">Toggle Phone Frame</span>
+          </button>
+
+          <!-- User Pill (Ankit, Azad Hall, Final Year B.Tech) -->
+          <div class="flex items-center space-x-2 bg-slate-800/90 border border-slate-700 pl-2 pr-3 py-1 rounded-full cursor-pointer hover:border-orange-500/40 transition" onclick="switchTab('profile')">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop&crop=faces" class="w-7 h-7 rounded-full object-cover ring-2 ring-orange-500" alt="Ankit">
+              <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-900"></span>
+            </div>
+            <div class="text-left hidden sm:block">
+              <div class="text-xs font-semibold leading-tight flex items-center gap-1">
+                <span>Ankit</span>
+                <span class="text-[10px] bg-amber-400/20 text-amber-300 px-1 rounded font-bold">⭐ 95%</span>
+              </div>
+              <div class="text-[10px] text-slate-400 leading-none">Azad Hall • Final Year B.Tech</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 flex justify-center items-start p-2 sm:p-4 md:p-6 lg:p-8">
+      
+      <!-- Phone Simulator Outer Box -->
+      <div id="app-container" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col relative transition-all duration-300 min-h-[780px] max-h-[92vh]">
+        
+        <!-- App Top Bar (Campus selector + Notifications) -->
+        <div class="px-4 pt-4 pb-3 border-b border-slate-800/80 bg-slate-900/95 flex items-center justify-between sticky top-0 z-20">
+          <div>
+            <div class="flex items-center space-x-1.5 text-xs text-orange-400 font-semibold uppercase tracking-wider">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>IIT Kharagpur Live Hub</span>
+            </div>
+            <h2 class="text-lg font-display font-bold text-white flex items-center gap-1.5 cursor-pointer">
+              <span id="active-community-label">Azad Hall & Campus Rallies</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </h2>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="triggerGhostNudge()" title="Simulate a Proactive Ghost Rally Nudge" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 border border-slate-700 relative">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+              <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>
+              <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
+            </button>
+            <button onclick="openCreateModal()" class="w-9 h-9 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/30 transition transform active:scale-95">
+              <i data-lucide="plus" class="w-5 h-5 font-bold"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Screen Content -->
+        <div id="screen-content" class="flex-1 overflow-y-auto p-4 space-y-4 pb-24 scroll-smooth">
+          
+          <!-- TAB 1: FEED / EXPLORE (Default) -->
+          <div id="tab-feed" class="space-y-4">
+
+            <!-- Proactive / Ghost Rally Banner (IIT KGP Proximity Prompt) -->
+            <div id="ghost-banner" class="bg-gradient-to-r from-orange-950/60 via-slate-800/80 to-slate-900 border border-orange-500/30 rounded-2xl p-3.5 shadow-lg relative overflow-hidden group">
+              <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-orange-500/10 rounded-full blur-xl"></div>
+              <div class="flex items-start justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="flex h-2 w-2 rounded-full bg-orange-400 animate-pulse"></span>
+                  <span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider">Azad Sector Smart Nudge</span>
+                </div>
+                <button onclick="dismissGhostBanner()" class="text-slate-500 hover:text-slate-300">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+              <p class="text-xs text-slate-200 mt-1 font-medium">
+                ⚡ <span class="font-bold text-white">4 badminton players</span> near Azad & Nehru Hall are free right now (Gymkhana courts are empty)!
+              </p>
+              <div class="mt-2.5 flex items-center space-x-2">
+                <button onclick="quickStartRally('Badminton Doubles', 4, 'Gymkhana Court 2')" class="text-xs bg-orange-500 hover:bg-orange-600 text-white font-semibold px-3 py-1.5 rounded-lg shadow-md transition">
+                  Auto-Rally Badminton 🏸
+                </button>
+                <button onclick="dismissGhostBanner()" class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1">
+                  Later
+                </button>
+              </div>
+            </div>
+
+            <!-- Category Pills Filter -->
+            <div class="flex space-x-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+              <button onclick="filterCategory('All')" class="category-pill active-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-medium transition">
+                ⚡ All (6)
+              </button>
+              <button onclick="filterCategory('Sports')" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-medium transition">
+                🏏 Sports (2)
+              </button>
+              <button onclick="filterCategory('Academics')" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-medium transition">
+                📚 CDC & Study (2)
+              </button>
+              <button onclick="filterCategory('Travel')" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-medium transition">
+                🚴 2.2K Loops (1)
+              </button>
+              <button onclick="filterCategory('Food')" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-medium transition">
+                ☕ Chhedis & TechM (1)
+              </button>
+            </div>
+
+            <!-- Urgent / Happening Now Section Header -->
+            <div class="flex items-center justify-between pt-1">
+              <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Active Rallies in KGP</span>
+              </div>
+              <span class="text-[11px] text-slate-500" id="rally-count-text">6 rallies found</span>
+            </div>
+
+            <!-- List of Rallies (Dynamically Populated) -->
+            <div id="rallies-list" class="space-y-3.5">
+              <!-- Rendered via JavaScript -->
+            </div>
+
+          </div>
+
+          <!-- TAB 2: COMMUNITIES / SQUADS -->
+          <div id="tab-squads" class="space-y-4 hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-display font-bold text-white text-base">Halls & Campus Squads</h3>
+                <p class="text-xs text-slate-400">Join recurring KGP circles or launch a new hall squad</p>
+              </div>
+              <button onclick="openCreateSquadModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-orange-400 border border-orange-500/30 flex items-center gap-1">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>New Squad</span>
+              </button>
+            </div>
+
+            <!-- Featured Squads Container -->
+            <div id="squads-list" class="space-y-3">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+
+          <!-- TAB 3: MY RALLIES & ACTIVITY HISTORY -->
+          <div id="tab-my-rallies" class="space-y-4 hidden">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <div class="flex space-x-3 text-xs font-bold">
+                <button onclick="toggleMyRalliesFilter('upcoming')" id="btn-subtab-upcoming" class="text-orange-400 border-b-2 border-orange-500 pb-1">
+                  Active & Joined (2)
+                </button>
+                <button onclick="toggleMyRalliesFilter('history')" id="btn-subtab-history" class="text-slate-400 hover:text-slate-200 pb-1">
+                  Past History (8)
+                </button>
+              </div>
+              <span class="text-[11px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Final Year • Semester 7</span>
+            </div>
+
+            <div id="my-rallies-list" class="space-y-3">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+
+          <!-- TAB 4: PROFILE & SHOW-UP TRUST SCORE -->
+          <div id="tab-profile" class="space-y-4 hidden">
+            <!-- User Header Card (Ankit, Azad Hall) -->
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80 rounded-2xl p-4 text-center relative overflow-hidden">
+              <div class="absolute top-2 right-2 flex items-center space-x-1 bg-amber-400/10 border border-amber-400/30 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <i data-lucide="shield-check" class="w-3 h-3"></i>
+                <span>IIT KGP Verified</span>
+              </div>
+
+              <div class="relative inline-block mx-auto mt-2">
+                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&h=160&fit=crop&crop=faces" class="w-20 h-20 rounded-full object-cover ring-4 ring-orange-500 mx-auto" alt="Ankit">
+                <span class="absolute bottom-0 right-0 bg-orange-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ring-2 ring-slate-900">GOLD</span>
+              </div>
+
+              <h3 class="font-display font-bold text-lg text-white mt-2">Ankit</h3>
+              <p class="text-xs text-slate-400">Azad Hall of Residence • Final Year B.Tech</p>
+              
+              <!-- Tag Pills -->
+              <div class="flex flex-wrap justify-center gap-1.5 mt-3">
+                <span class="text-[10px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">🏏 Box Cricket (Azad Quad)</span>
+                <span class="text-[10px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">📚 CDC Placement Prep</span>
+                <span class="text-[10px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">☕ Chhedis Night Adda</span>
+                <span class="text-[10px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">🚴 2.2K Campus Loop</span>
+              </div>
+            </div>
+
+            <!-- Show-Up / Anti-Ghosting Reliability Meter -->
+            <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <div>
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                    <span>Show-Up Reliability Score</span>
+                  </h4>
+                  <p class="text-[11px] text-slate-400">GPS venue check-in rate across IIT KGP</p>
+                </div>
+                <div class="text-right">
+                  <span class="text-2xl font-display font-extrabold text-amber-400">95%</span>
+                  <div class="text-[9px] text-emerald-400 font-semibold">Tier 1: Highly Trusted KGPian</div>
+                </div>
+              </div>
+
+              <!-- Bar -->
+              <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-emerald-400 rounded-full" style="width: 95%"></div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-700/60 text-center">
+                <div class="bg-slate-900/60 p-2 rounded-xl">
+                  <div class="text-base font-bold text-white">19</div>
+                  <div class="text-[10px] text-slate-400">Attended</div>
+                </div>
+                <div class="bg-slate-900/60 p-2 rounded-xl">
+                  <div class="text-base font-bold text-white">1</div>
+                  <div class="text-[10px] text-slate-400">Excused (<2h)</div>
+                </div>
+                <div class="bg-slate-900/60 p-2 rounded-xl">
+                  <div class="text-base font-bold text-rose-400">0</div>
+                  <div class="text-[10px] text-slate-400">Ghosted 🚫</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campus Impact / Stats -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-3.5 space-y-2">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">My KGP Network</h4>
+              <div class="flex items-center justify-between text-xs py-1 border-b border-slate-800">
+                <span class="text-slate-400">New Peers Met Across Other Halls</span>
+                <span class="font-bold text-white">41 KGPians</span>
+              </div>
+              <div class="flex items-center justify-between text-xs py-1 border-b border-slate-800">
+                <span class="text-slate-400">Rallies Organized in Azad</span>
+                <span class="font-bold text-white">7 completed</span>
+              </div>
+              <div class="flex items-center justify-between text-xs py-1">
+                <span class="text-slate-400">Hours Saved From Wing WhatsApp Chaos</span>
+                <span class="font-bold text-emerald-400">~18.0 hours</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sticky Bottom Navigation Bar -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex items-center justify-around z-30">
+          <button onclick="switchTab('feed')" id="nav-btn-feed" class="nav-tab active-nav flex flex-col items-center py-1 text-orange-400">
+            <i data-lucide="compass" class="w-5 h-5"></i>
+            <span class="text-[10px] font-bold mt-1">Explore</span>
+          </button>
+          
+          <button onclick="switchTab('squads')" id="nav-btn-squads" class="nav-tab flex flex-col items-center py-1 text-slate-400 hover:text-slate-200">
+            <i data-lucide="users" class="w-5 h-5"></i>
+            <span class="text-[10px] font-bold mt-1">Halls & Squads</span>
+          </button>
+
+          <!-- Floating Fast Action Button -->
+          <button onclick="openCreateModal()" class="-mt-6 w-12 h-12 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white flex items-center justify-center shadow-xl shadow-orange-500/40 ring-4 ring-slate-900 transition transform hover:scale-105 active:scale-95">
+            <i data-lucide="zap" class="w-6 h-6 fill-white"></i>
+          </button>
+
+          <button onclick="switchTab('my-rallies')" id="nav-btn-my-rallies" class="nav-tab flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 relative">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+            <span class="text-[10px] font-bold mt-1">My Rallies</span>
+            <span class="absolute top-0 right-3 w-2 h-2 bg-orange-500 rounded-full"></span>
+          </button>
+
+          <button onclick="switchTab('profile')" id="nav-btn-profile" class="nav-tab flex flex-col items-center py-1 text-slate-400 hover:text-slate-200">
+            <i data-lucide="user" class="w-5 h-5"></i>
+            <span class="text-[10px] font-bold mt-1">Profile</span>
+          </button>
+        </nav>
+
+      </div>
+    </main>
+
+    <!-- Footer with PM Context and Quick Reset Tools -->
+    <footer class="border-t border-slate-800 bg-slate-950/80 px-4 py-3 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto w-full">
+      <div class="flex items-center space-x-2">
+        <span class="font-semibold text-slate-300">RallyUp IIT Kharagpur Edition</span>
+        <span>•</span>
+        <span>Built by Ankit (Azad Hall • Final Year B.Tech)</span>
+        <span>•</span>
+        <span class="text-orange-400 font-medium">Auto-confirms at min players</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button onclick="resetDemoData()" class="hover:text-slate-300 underline text-[11px]">Reset KGP Demo Data</button>
+        <span>•</span>
+        <button onclick="seedHighDemandRally()" class="hover:text-orange-400 text-[11px] font-medium">+ Add Live Cricket in Azad Quad</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL 1: CREATE RALLY -->
+  <div id="modal-create" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-md p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-base">Launch a Rally in KGP</h3>
+            <p class="text-[11px] text-slate-400">Broadcast to nearby halls & campus in 15 seconds</p>
+          </div>
+        </div>
+        <button onclick="closeCreateModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="create-rally-form" onsubmit="handleCreateRally(event)" class="mt-4 space-y-4">
+        <!-- Activity Name & Emoji -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Activity / Purpose *</label>
+          <div class="grid grid-cols-3 gap-2 mb-2">
+            <button type="button" onclick="selectQuickActivity('🏏 Box Cricket (Azad Quad)', 'Sports', 6, 12, 'Azad Hall Main Quad')" class="quick-act-btn p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-orange-500 text-xs font-medium text-left transition">
+              🏏 Azad Cricket
+            </button>
+            <button type="button" onclick="selectQuickActivity('📚 CDC Placement Group Study', 'Academics', 3, 5, 'Nalanda Complex (NRN 120)')" class="quick-act-btn p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-orange-500 text-xs font-medium text-left transition">
+              📚 Nalanda Study
+            </button>
+            <button type="button" onclick="selectQuickActivity('☕ Chhedis Midnight Chai Run', 'Food', 3, 6, 'Chhedis Night Canteen')" class="quick-act-btn p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-orange-500 text-xs font-medium text-left transition">
+              ☕ Chhedis Run
+            </button>
+          </div>
+          <input type="text" id="input-title" required placeholder="e.g., 6v6 Box Cricket or Night Cycling Loop" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+        </div>
+
+        <!-- Category & Community Scope -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Category</label>
+            <select id="input-category" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+              <option value="Sports">Sports & Gymkhana</option>
+              <option value="Academics">CDC & Nalanda Study</option>
+              <option value="Travel">2.2K Cycling & Trips</option>
+              <option value="Food">Chhedis & TechM Food</option>
+              <option value="Creative">Spring Fest / Jamming</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Audience Scope</label>
+            <select id="input-scope" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+              <option value="Entire Campus">Entire KGP (Open)</option>
+              <option value="Azad Hall Only">Azad Hall Only</option>
+              <option value="Azad + Nehru + Patel">Azad + Nehru + Patel Sector</option>
+              <option value="Final Year Batch">Final Year B.Tech Only</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Min & Max Headcount Thresholds -->
+        <div class="bg-slate-950/60 p-3 rounded-2xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-300">Minimum Needed to Confirm *</span>
+            <span class="text-orange-400 font-bold" id="min-players-val">6 Players</span>
+          </div>
+          <p class="text-[10px] text-slate-400">Rally auto-confirms & locks venue the moment this threshold is met.</p>
+          <input type="range" id="input-min" min="2" max="15" value="6" oninput="updateHeadcountLabel(this.value)" class="w-full accent-orange-500 cursor-pointer">
+          <div class="flex justify-between text-[10px] text-slate-500">
+            <span>2 (Duo/Study)</span>
+            <span>6 (Half Team)</span>
+            <span>12+ (Full Match)</span>
+          </div>
+        </div>
+
+        <!-- Time & Venue -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Time Window *</label>
+            <input type="text" id="input-time" required value="Today 5:30 PM – 7:00 PM" placeholder="e.g. Today 5:30 PM" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Venue (KGP Spot) *</label>
+            <input type="text" id="input-venue" required value="Azad Hall Main Quad" placeholder="e.g. Gymkhana Grounds" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+          </div>
+        </div>
+
+        <!-- Vibe Tags -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Vibe & Skill Level</label>
+          <div class="flex flex-wrap gap-1.5" id="vibe-tags-container">
+            <button type="button" onclick="toggleTag(this)" class="tag-btn active-tag text-[10px] px-2.5 py-1 rounded-full border border-orange-500/50 bg-orange-500/20 text-orange-300">#CasualAdda</button>
+            <button type="button" onclick="toggleTag(this)" class="tag-btn text-[10px] px-2.5 py-1 rounded-full border border-slate-700 bg-slate-800 text-slate-300">#TennisBall</button>
+            <button type="button" onclick="toggleTag(this)" class="tag-btn text-[10px] px-2.5 py-1 rounded-full border border-slate-700 bg-slate-800 text-slate-300">#Competitive</button>
+            <button type="button" onclick="toggleTag(this)" class="tag-btn text-[10px] px-2.5 py-1 rounded-full border border-slate-700 bg-slate-800 text-slate-300">#Quick1Hour</button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg shadow-orange-500/30 transition transform active:scale-98 flex items-center justify-center space-x-1.5">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Broadcast Rally Across KGP</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: RALLY DETAILS & LIVE COORDINATION ROOM -->
+  <div id="modal-details" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-5 shadow-2xl relative max-h-[92vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span id="detail-category-badge" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">Sports</span>
+            <span id="detail-status-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Confirmed ✅</span>
+          </div>
+          <h3 id="detail-title" class="font-display font-extrabold text-white text-lg mt-1">Azad Quad 6v6 Box Cricket</h3>
+          <p id="detail-time-loc" class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i> Today 5:30 PM • Azad Hall Main Quad
+          </p>
+        </div>
+        <button onclick="closeDetailsModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Inner Details -->
+      <div class="flex-1 overflow-y-auto py-3 space-y-4 pr-1">
+
+        <!-- Headcount Bar -->
+        <div class="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800">
+          <div class="flex justify-between items-center text-xs mb-1.5">
+            <span class="font-bold text-slate-200">Headcount Progress</span>
+            <span id="detail-count-num" class="font-extrabold text-orange-400">5 / 6 Joined</span>
+          </div>
+          <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div id="detail-progress-bar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-300" style="width: 83%"></div>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-slate-400 mt-2">
+            <span>Organizer: <strong class="text-white" id="detail-organizer-name">Ankit (⭐ 95%)</strong></span>
+            <span id="detail-countdown" class="text-amber-400 font-semibold">Closes in 45 mins</span>
+          </div>
+        </div>
+
+        <!-- Venue Voting Poll (if undecided or multi-spot) -->
+        <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-200 flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>Venue Consensus Poll</span>
+            </span>
+            <span class="text-[10px] text-emerald-400 font-semibold">Live Voting</span>
+          </div>
+          <div class="space-y-2 text-xs" id="venue-poll-container">
+            <!-- Dynamic options -->
+          </div>
+        </div>
+
+        <!-- Confirmed Players Grid with Show-Up Badges -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Joined KGPians (<span id="detail-joined-count">5</span>)</span>
+            <span class="text-[10px] text-slate-400">Verified KGP Students</span>
+          </div>
+          <div id="detail-players-grid" class="grid grid-cols-2 gap-2 text-xs">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Live Coordination Chat Room -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3 flex flex-col h-44">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
+            <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+              <i data-lucide="message-square" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Rally Coordination Room</span>
+            </span>
+            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">Auto-expires post-game</span>
+          </div>
+          
+          <div id="rally-chat-box" class="flex-1 overflow-y-auto space-y-2 text-xs pr-1">
+            <div class="text-slate-400 text-[10px] text-center my-1 italic">Rally reached minimum headcount! Coordination chat unlocked.</div>
+            <div class="bg-slate-900 p-2 rounded-xl text-slate-200">
+              <span class="font-bold text-orange-400 text-[11px]">Subham (Nehru):</span> Bringing taped tennis balls from TechM!
+            </div>
+            <div class="bg-slate-900 p-2 rounded-xl text-slate-200">
+              <span class="font-bold text-emerald-400 text-[11px]">Rohan (Patel):</span> Cycled back from Nalanda, reaching in 5 mins.
+            </div>
+          </div>
+
+          <form onsubmit="handleSendChat(event)" class="mt-2 flex gap-1.5">
+            <input type="text" id="chat-input" placeholder="Drop quick update..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded-xl text-xs font-semibold">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Action Footer (I'm In vs Leave vs Check-in) -->
+      <div id="detail-action-footer" class="border-t border-slate-800 pt-3 flex gap-2">
+        <!-- Rendered dynamically depending on join status -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center space-y-2 pointer-events-none"></div>
+
+  <!-- Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

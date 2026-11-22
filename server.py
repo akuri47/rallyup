@@ -1,0 +1,30 @@
+import os
+import sys
+import webbrowser
+from flask import Flask, send_from_directory
+
+app = Flask(__name__, static_folder='.')
+
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('.', path)
+
+if __name__ == '__main__':
+    port = 5050
+    print(f"=====================================================")
+    print(f"  RallyUp Campus App is running locally!")
+    print(f"  URL: http://localhost:{port}")
+    print(f"  Open in browser: http://localhost:{port}")
+    print(f"=====================================================")
+    
+    # Optionally open in browser automatically
+    try:
+        webbrowser.open(f"http://localhost:{port}")
+    except Exception:
+        pass
+        
+    app.run(host='0.0.0.0', port=port, debug=False)
